@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+
+  wordpress:
+    container_name: wordpress
+    restart: always
+    #image: wordpress:6.5.3-php8.3-apache
+    #image: wordpress:6.5.4-php8.3-apache
+    image: wordpress:6.5.4-php8.1-apache
+    ports:
+      - "8081:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_TABLE_PREFIX: wp_
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    depends_on:
+      - db
+    volumes:
+      - ./wordpress_data:/var/www/html
+      - ./config/php/php.ini:/usr/local/etc/php/php.ini
+      - ./log/apache:/var/log/apache2
+    #extra_hosts:
+    #  - "test1.com:192.168.1.88"
+    #  - "www.test1.com:192.168.1.88"
+
+  db:
+    container_name: mysql
+    image: mysql:8.3.0
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: somewordpress
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+      - ./log/mysql:/var/log/mysql
+      - ./initdb-scripts:/docker-entrypoint-initdb.d
+
+volumes:
+  wordpress_data:
+  mysql_data:
+  initdb-scripts:
